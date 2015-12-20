@@ -67,15 +67,16 @@ int prime_genPrimeList(int **ppList, int *pLen, int maxNumberChecked) {
     }
 
     /* Alloc the return buffer */
-    pList = (int*)malloc(sizeof(int) * len);
+    pList = (int*)malloc(sizeof(int) * (len + 1));
     if (!pList) {
         free(pBitSieve);
         return 1;
     }
 
+    pList[0] = 2;
     /* Loop through the sieve and store all prime numbers */
     i = 0;
-    len = 0;
+    len = 1;
     while (i >> 3 < sieveLen) {
         /* If a 0 bit was found, its a prime number */
         if (!(pBitSieve[i >> 3] >> (i & 7))) {
