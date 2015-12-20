@@ -48,7 +48,7 @@ int prime_genPrimeList(int **ppList, int *pLen, int maxNumberChecked) {
     i = 0;
     while (i >> 3 < sieveLen) {
         /* If a 0 bit was found, its a new prime number */
-        if (!(pBitSieve[i >> 3] >> (i & 7))) {
+        if (!(pBitSieve[i >> 3] & (1 << (i & 7)))) {
             int j;
 
             /* Increase the number of primes found */
@@ -79,7 +79,7 @@ int prime_genPrimeList(int **ppList, int *pLen, int maxNumberChecked) {
     len = 1;
     while (i >> 3 < sieveLen) {
         /* If a 0 bit was found, its a prime number */
-        if (!(pBitSieve[i >> 3] >> (i & 7))) {
+        if (!(pBitSieve[i >> 3] & (1 << (i & 7)))) {
             pList[len] = i << 1 + 3;
             len++;
         }
