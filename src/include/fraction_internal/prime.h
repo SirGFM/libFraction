@@ -7,13 +7,14 @@
  * is finished, the sieve is searched for the next 0 bit and the process is
  * repeated.
  *
- * @file src/include/prime.h
+ * @file src/include/fraction_internal/prime.h
  */
 #ifndef __PRIME_H__
 #define __PRIME_H__
 
 /**
  * Create a list of primes that goes up to the prime closest to maxNumberChecked
+ * rounded up to the nearest 8 multiple
  *
  * @param  [out]ppList           The list of sequencial primes
  * @param  [out]pLen             How many numbers there are in the list
