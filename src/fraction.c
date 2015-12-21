@@ -68,6 +68,7 @@ struct stFraction {
  * @return                       0 on success, 1 on failure
  */
 int fractionManager_init(fractionManager **ppOut, int maxNumberChecked) {
+    fractionBuffer *pCurBuffer;
     fractionManager *pMng;
     int irv;
 
@@ -89,20 +90,23 @@ int fractionManager_init(fractionManager **ppOut, int maxNumberChecked) {
             maxNumberChecked);
     INIT_ASSERT(irv == 0);
 
-    /* "Pre-alloc" a buffer of fractions */
+    /* Alloc a list of fraction buffer */
     pMng->numFractionBuffers = 1;
     pMng->ppFractionBuffers = (fractionBuffer**)malloc(sizeof(fractionBuffer*));
     INIT_ASSERT(pMng->ppFractionBuffers);
+    pMng->ppFractionBuffers[0] = 0;
 
-    pMng->ppFractionBuffers[0] = (fractionBuffer*)malloc(
-            sizeof(fractionBuffer));
-    INIT_ASSERT(pMng->ppFractionBuffers[0]);
-    memset(pMng->ppFractionBuffers[0], 0x0, sizeof(fractionBuffer));
+    /* "Pre-alloc" the first buffer of fractions */
+    pCurBuffer = (fractionBuffer*)malloc(sizeof(fractionBuffer));
+    INIT_ASSERT(pCurBuffer);
+    memset(pCurBuffer, 0x0, sizeof(fractionBuffer));
+    /* Store it in the list */
+    pMng->ppFractionBuffers[0] = pCurBuffer;
 
-    pMng->ppFractionBuffers[0].numFractions = 512;
-    pMng->ppFractionBuffers[0].pFractions = (fraction*)malloc(sizeof(fraction) *
-            pMng->ppFractionBuffers[0].numFractions);
-    INIT_ASSERT(pMng->ppFractionBuffers[0].pFractions);
+    pCurBuffer.numFractions = 512;
+    pCurBuffer.pFractions = (fraction*)malloc(sizeof(fraction) *
+            pCurBuffer.numFractions);
+    INIT_ASSERT(pCurBuffer.pFractions);
 
 #undef INIT_ASSERT
 
@@ -176,7 +180,7 @@ static int fractionManager_getNewFraction(fraction **ppOut,
         return 0;
     }
 
-    pCurBuffer = &(pMng->ppFractionBuffers[pMng->numFractionBuffers - 1]);
+    pCurBuffer = pMng->ppFractionBuffers[pMng->numFractionBuffers - 1];
     /* Try to retrieve an already alloc'ed fraction */
     if (pCurBuffer->usedFractions < pCurBuffer->numFractions) {
         *ppOut = &(pCurBuffer->pFractions[pCurBuffer->usedFractions]);
@@ -194,6 +198,7 @@ static int fractionManager_getNewFraction(fraction **ppOut,
     }
     pMng->ppFractionBuffers[pMng->numFractionBuffers - 1] = 0;
 
+    /* Alloc a new buffer and store it in the list */
     pCurBuffer = (fractionBuffer*)malloc(sizeof(fractionBuffer));
     if (!pCurBuffer) {
         return 1;
@@ -215,7 +220,7 @@ static int fractionManager_getNewFraction(fraction **ppOut,
 }
 
 /**
- * Simply a fraction
+ * Simplify a fraction
  *
  * @param  [ in]pFrac The fraction
  */
@@ -227,6 +232,7 @@ static void fraction_simplify(fraction *pFrac) {
 
     /* Check all feasible prime */
     i = 0;
+    /* TODO OPTIMIZATION: run loop while pPrimes[i] < sqrt(num) */
     while (i < pMng->numPrimes && pMng->pPrimes[i] < pFrac->numerator && 
             pMng->pPrimes[i] < pFrac->denominator) {
         /* Divide both numerator and denominator if the prime is common to
@@ -295,8 +301,8 @@ int fractionManager_fxGetFraction(fraction **ppOut, fractionManager *pMng,
     }
 
     /* Initialize it */
-    (*ppOut)->numerator = val / divisor;
-    (*ppOut)->denominator = val % divisor;
+    (*ppOut)->numerator = val;
+    (*ppOut)->denominator = divisor;
     (*ppOut)->pNext = 0;
     (*ppOut)->pManager = pMng;
     fraction_simplify(*ppOut);
@@ -323,8 +329,8 @@ int fractionManager_fgetFraction(fraction **ppOut, fractionManager *pMng,
     }
 
     /* Initialize it */
-    (*ppOut)->numerator = val * 1000000;
-    (*ppOut)->denominator = 1000000;
+    (*ppOut)->numerator = val * 10000;
+    (*ppOut)->denominator = 10000;
     (*ppOut)->pNext = 0;
     (*ppOut)->pManager = pMng;
     fraction_simplify(*ppOut);
@@ -351,8 +357,8 @@ int fractionManager_dgetFraction(fraction **ppOut, fractionManager *pMng,
     }
 
     /* Initialize it */
-    (*ppOut)->numerator = val * 1000000;
-    (*ppOut)->denominator = 1000000;
+    (*ppOut)->numerator = val * 10000;
+    (*ppOut)->denominator = 10000;
     (*ppOut)->pNext = 0;
     (*ppOut)->pManager = pMng;
     fraction_simplify(*ppOut);
@@ -398,7 +404,8 @@ int fractionManager_clone(fraction **ppOut, fraction *pSrc) {
 }
 
 /**
- * Find the least common denominator to both fractions
+ * Find the least common denominator to both fractions, and set it as the base
+ * for both fractions
  *
  * @param  [ in]pA A fraction
  * @param  [ in]pB The other fraction
