@@ -16,6 +16,8 @@
  * If, at some point, the need to use these numbers in a more conventional way
  * arise, they can be exported to intege (dicarding the decimal part), to
  * decimal fixed point, to float-point numbers and to doubles.
+ *
+ * @file include/fraction/fraction.h
  */
 #ifndef __FRACTION_STRUCT__
 #define __FRACTION_STRUCT__
@@ -99,22 +101,19 @@ int fractionManager_dgetFraction(fraction **ppOut, fractionManager *pMng,
  * Releases a fraction to the fraction manager. This enables the manager to
  * recycle fractions that have already been allocated but aren't in use
  *
- * @param  [ in]pMng  The fraction manager
  * @param  [ in]pFrac The number to be released
  * @return            0 on success, 1 on failure
  */
-int fractionManager_releaseFraction(fractionManager *pMng, fraction *pFrac);
+void fractionManager_releaseFraction(fraction *pFrac);
 
 /**
  * Clones a fraction number into a newly alloc'ed one
  *
  * @param  [out]ppOut The cloned fraction
- * @param  [ in]pMng  The fraction manager
  * @param  [ in]pSrc  The orignal number
  * @return            0 on success, 1 on failure
  */
-int fractionManager_clone(fraction **ppOut, fractionManager *pMng,
-        fraction *pSrc);
+int fractionManager_clone(fraction **ppOut, fraction *pSrc);
 
 /**
  * Adds two fractional numbers
