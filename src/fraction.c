@@ -103,10 +103,10 @@ int fractionManager_init(fractionManager **ppOut, int maxNumberChecked) {
     /* Store it in the list */
     pMng->ppFractionBuffers[0] = pCurBuffer;
 
-    pCurBuffer.numFractions = 512;
-    pCurBuffer.pFractions = (fraction*)malloc(sizeof(fraction) *
-            pCurBuffer.numFractions);
-    INIT_ASSERT(pCurBuffer.pFractions);
+    pCurBuffer->numFractions = 512;
+    pCurBuffer->pFractions = (fraction*)malloc(sizeof(fraction) *
+            pCurBuffer->numFractions);
+    INIT_ASSERT(pCurBuffer->pFractions);
 
 #undef INIT_ASSERT
 
@@ -140,8 +140,8 @@ void fractionManager_clean(fractionManager **ppMng) {
         i = 0;
         while (i < pMng->numFractionBuffers) {
             if (pMng->ppFractionBuffers[i]) {
-                if (pMng->ppFractionBuffers[i].pFractions) {
-                    free(pMng->ppFractionBuffers[i].pFractions);
+                if (pMng->ppFractionBuffers[i]->pFractions) {
+                    free(pMng->ppFractionBuffers[i]->pFractions);
                 }
                 free(pMng->ppFractionBuffers[i]);
             }
@@ -206,16 +206,16 @@ static int fractionManager_getNewFraction(fraction **ppOut,
     memset(pCurBuffer, 0x0, sizeof(fractionBuffer));
     pMng->ppFractionBuffers[pMng->numFractionBuffers - 1] = pCurBuffer;
 
-    pCurBuffer.numFractions = 512;
-    pCurBuffer.pFractions = (fraction*)malloc(sizeof(fraction) *
-            pCurBuffer.numFractions);
-    if (!pCurBuffer.pFractions) {
+    pCurBuffer->numFractions = 512;
+    pCurBuffer->pFractions = (fraction*)malloc(sizeof(fraction) *
+            pCurBuffer->numFractions);
+    if (!pCurBuffer->pFractions) {
         return 1;
     }
 
     /* Retrieve a reference from this new buffer */
-    *ppOut = &(pCurBuffer.pFractions[0]);
-    pCurBuffer.usedFractions++;
+    *ppOut = &(pCurBuffer->pFractions[0]);
+    pCurBuffer->usedFractions++;
     return 0;
 }
 
@@ -414,7 +414,7 @@ static void fraction_setLCD(fraction *pA, fraction *pB) {
     fractionManager *pMng;
     int denA, denB, i;
 
-    pMng = pFrac->pManager;
+    pMng = pA->pManager;
 
     /* Retrieve both numbers denominators */
     denA = pA->denominator;
@@ -471,9 +471,9 @@ void fraction_sum(fraction *pOut, fraction *pA, fraction *pB) {
     /* Add the numerator */
     pOut->numerator = pA->numerator + pB->numerator;
 
-    simplify(pA);
-    simplify(pB);
-    simplify(pOut);
+    fraction_simplify(pA);
+    fraction_simplify(pB);
+    fraction_simplify(pOut);
 }
 
 /**
@@ -493,9 +493,9 @@ void fraction_sub(fraction *pOut, fraction *pA, fraction *pB) {
     /* Add the numerator */
     pOut->numerator = pA->numerator - pB->numerator;
 
-    simplify(pA);
-    simplify(pB);
-    simplify(pOut);
+    fraction_simplify(pA);
+    fraction_simplify(pB);
+    fraction_simplify(pOut);
 }
 
 /**
@@ -511,7 +511,7 @@ void fraction_mul(fraction *pOut, fraction *pA, fraction *pB) {
     pOut->numerator = pA->numerator * pB->numerator;
     pOut->denominator = pA->denominator * pB->denominator;
 
-    simplify(pOut);
+    fraction_simplify(pOut);
 }
 
 /**
@@ -527,7 +527,7 @@ void fraction_div(fraction *pOut, fraction *pA, fraction *pB) {
     pOut->numerator = pA->numerator * pB->denominator;
     pOut->denominator = pA->denominator * pB->numerator;
 
-    simplify(pOut);
+    fraction_simplify(pOut);
 }
 
 /**

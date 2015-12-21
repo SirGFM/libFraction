@@ -54,12 +54,12 @@ int prime_genPrimeList(int **ppList, int *pLen, int maxNumberChecked) {
             /* Increase the number of primes found */
             len++;
             /* Get the index of the next odd multiple of 'i' */
-            j = i + i << 1 + 3;
+            j = i + (i << 1) + 3;
 
             /* Mark all odd multiple of 'i' */
             while (j < maxNumberChecked) {
                 pBitSieve[j >> 3] |= 1 << (j & 7);
-                j += i << 1 + 3;
+                j += (i << 1) + 3;
             }
         }
         /* Go to the next number */
@@ -80,7 +80,7 @@ int prime_genPrimeList(int **ppList, int *pLen, int maxNumberChecked) {
     while (i >> 3 < sieveLen) {
         /* If a 0 bit was found, its a prime number */
         if (!(pBitSieve[i >> 3] & (1 << (i & 7)))) {
-            pList[len] = i << 1 + 3;
+            pList[len] = (i << 1) + 3;
             len++;
         }
         /* Go to the next number */
