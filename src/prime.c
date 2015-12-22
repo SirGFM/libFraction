@@ -45,10 +45,13 @@ int prime_genPrimeList(int **ppList, int *pLen, int maxNumberChecked) {
     memset(pBitSieve, 0x0, sieveLen);
 
     /* Search for all prime bits so their multiples may be marked */
-    i = 0;
-    while (i >> 3 < sieveLen) {
+    i = 3;
+    while (((i - 3) >> 4) < sieveLen) {
+        int mappedI;
+
+        mappedI = (i - 3) >> 1;
         /* If a 0 bit was found, its a new prime number */
-        if (!(pBitSieve[i >> 3] & (1 << (i & 7)))) {
+        if (!(pBitSieve[mappedI >> 3] & (1 << (mappedI & 7)))) {
             int j;
 
             /* Increase the number of primes found */
@@ -57,13 +60,17 @@ int prime_genPrimeList(int **ppList, int *pLen, int maxNumberChecked) {
             j = i + (i << 1) + 3;
 
             /* Mark all odd multiple of 'i' */
-            while (j < maxNumberChecked) {
-                pBitSieve[j >> 3] |= 1 << (j & 7);
+            while (((j - 3) >> 4) < sieveLen) {
+                int mappedJ;
+
+                mappedJ = (j - 3) >> 1;
+                pBitSieve[mappedJ >> 3] |= (1 << (mappedJ & 7));
+
                 j += (i << 1) + 3;
             }
         }
         /* Go to the next number */
-        i++;
+        i += 2;
     }
 
     /* Alloc the return buffer */
@@ -75,16 +82,19 @@ int prime_genPrimeList(int **ppList, int *pLen, int maxNumberChecked) {
 
     pList[0] = 2;
     /* Loop through the sieve and store all prime numbers */
-    i = 0;
+    i = 3;
     len = 1;
-    while (i >> 3 < sieveLen) {
+    while ((i - 3) >> 4 < sieveLen) {
+        int mappedI;
+
+        mappedI = (i - 3) >> 1;
         /* If a 0 bit was found, its a prime number */
-        if (!(pBitSieve[i >> 3] & (1 << (i & 7)))) {
+        if (!(pBitSieve[mappedI >> 3] & (1 << (mappedI & 7)))) {
             pList[len] = (i << 1) + 3;
             len++;
         }
         /* Go to the next number */
-        i++;
+        i += 2;
     }
 
     /* Set the return parameters */
